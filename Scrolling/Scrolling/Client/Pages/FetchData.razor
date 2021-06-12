@@ -1,0 +1,43 @@
+﻿@page "/fetchdata"
+@using Scrolling.Shared
+@using Sve.Blazor.InfiniteScroll.Components
+@using System.Threading;
+@using System.Threading.Tasks;
+@inject HttpClient Http
+
+<h1>Weather forecast</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        <Virtualize Context="forecast" ItemsProvider="@LoadData" OverscanCount="50">
+            <ItemContent>
+                <tr>
+                    <td id="@forecast.TemperatureC">N @forecast.TemperatureC </td>
+                </tr>
+            </ItemContent>
+            <Placeholder>
+                <p>Loading...</p>
+            </Placeholder>
+        </Virtualize>
+    </tbody>
+</table>
+
+@code {
+    private int totalEmployees = 1000000;
+
+    private async ValueTask<ItemsProviderResult<WeatherForecast>> LoadData(ItemsProviderRequest request)
+    {
+        WeatherForecast[] forecasts;
+        forecasts = await GetItems(request);
+        return new ItemsProviderResult<WeatherForecast>(forecasts, totalEmployees);
+    }
+
+    private async Task<WeatherForecast[]> GetItems(ItemsProviderRequest request)
+    {
+        return await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast/" + request.StartIndex + "/" + 1000);
+    }
+}
